@@ -1,2 +1,3 @@
 # goblin-hunter-pygame
-Simple game with python
+Simple game made using python library "pygame".
+(Work in Progress)
