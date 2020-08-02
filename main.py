@@ -1,8 +1,8 @@
 import pygame
 pygame.init()
 
-screen_width = 852
-screen_height = 480
+screen_width = 987
+screen_height = 598
 # setting window size.
 win = pygame.display.set_mode((screen_width, screen_height))
 # game window title
@@ -46,6 +46,7 @@ class player:
         self.jumpcount = jump_height
         self.jump = False
         self.standing = True
+        self.hitbox = (self.x+17, self.y+11, 29, 52)
 
     def draw(self, win):
         # since we have only 9 sprites/movement we set 3 frame = 1 image and walkCount <= 27
@@ -65,6 +66,8 @@ class player:
                 win.blit(self.walkRight[0], (int(self.x), int(self.y)))
             else:
                 win.blit(self.walkLeft[0], (int(self.x), int(self.y)))
+        self.hitbox = (self.x+17, self.y+11, 29, 52)
+        pygame.draw.rect(win, (255, 0, 150), tuple(map(int, self.hitbox)), 2)
 
 
 class fire_bullet:
@@ -107,7 +110,7 @@ class enemy:
 
     Methods:
     draw() ---> draws the character movement at location
-    moce() ---> enemy movement direction logic
+    move() ---> enemy movement direction logic
     '''
     walkRight = list(map(pygame.image.load,
                          '{folder}R1E.png {folder}R2E.png {folder}R3E.png {folder}R4E.png {folder}R5E.png {folder}R6E.png {folder}R7E.png {folder}R8E.png {folder}R9E.png {folder}R10E.png {folder}R11E.png'.format(folder='img/').split()))
@@ -123,6 +126,7 @@ class enemy:
         self.vel = vel
         self.walkCount = 0
         self.path = [self.x, self.end]
+        self.hitbox = (self.x+17, self.y+5, 30, 53)
 
     def draw(self, win):
         self.move()
@@ -135,6 +139,8 @@ class enemy:
         else:
             win.blit(self.walkLeft[self.walkCount//3], (int(self.x), int(self.y)))
             self.walkCount += 1
+        self.hitbox = (self.x+17, self.y+5, 30, 53)
+        pygame.draw.rect(win, (255, 0, 150), self.hitbox, 2)
 
     def move(self):
         if self.x+self.vel in range(self.path[0], self.path[1]):
@@ -142,6 +148,9 @@ class enemy:
         else:
             self.vel = self.vel * -1
             self.walkCount = 0
+
+    def hit(self):
+        print('hit')
 
 
 def redrawGameWindow():  # function to draw objects on window
@@ -154,10 +163,11 @@ def redrawGameWindow():  # function to draw objects on window
 
 
 clock = pygame.time.Clock()
-jump_height = 8
+jump_height = 9
 hero = player(20, 416, 64, 64, jump_height, vel=6)
-goblin = enemy(0, 420, 64, 64, screen_width-50)
+goblin = enemy(0, 420, 64, 64, screen_width-50, vel=3)
 run = True
+shoot = 0
 bullets = []
 
 # game begins
@@ -169,13 +179,24 @@ while run:
             run = False
     keys = pygame.key.get_pressed()
 
-    for bullet in bullets:  # fire bullets
+    if shoot > 0:
+        shoot += 1
+    if shoot > 5:
+        shoot = 0
+
+    for bullet in bullets:
+        # bullet hits goblin logic
+        if bullet.y-bullet.radius < goblin.hitbox[1]+goblin.hitbox[3] and bullet.y+bullet.radius > goblin.hitbox[1]:
+            if bullet.x-bullet.radius < goblin.hitbox[0]+goblin.hitbox[2] and bullet.x+bullet.radius > goblin.hitbox[0]:
+                goblin.hit()
+                bullets.pop(bullets.index(bullet))
+
         if bullet.x in range(0, screen_width):
             bullet.x += bullet.vel
         else:  # delete when beyond screen
             bullets.pop(bullets.index(bullet))
 
-    if keys[pygame.K_SPACE] and len(bullets) < 6:  # bullet creation
+    if keys[pygame.K_SPACE] and len(bullets) < 6 and shoot == 0:  # bullet creation
         if hero.left:
             facing = -1
         else:
@@ -183,7 +204,8 @@ while run:
         bullets.append(fire_bullet(
             round(hero.x+hero.width//2),
             round(hero.y+hero.height//2),
-            4, (0, 0, 0), facing))
+            5, (252, 177, 3), facing, vel=7))
+        shoot = 1
 
     if keys[pygame.K_LEFT] and hero.x > 0:  # movement control
         hero.x -= hero.vel
