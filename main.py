@@ -14,6 +14,21 @@ idle = pygame.image.load('img/standing.png')
 
 
 class player:
+    '''
+    Creates the main character of game
+
+    Object params:
+    x ---> initial x coordinate of player
+    y ---> initial y coordinate of player
+    width ---> width of player
+    height ---> height of player
+    jump_height ---> jumping height of player. Default 10
+    vel ---> Velocity of player. Default 8
+
+    Methods:
+    draw() ---> draws the character movement at location
+    '''
+
     walkRight = list(map(pygame.image.load,
                          '{folder}R1.png {folder}R2.png {folder}R3.png {folder}R4.png {folder}R5.png {folder}R6.png {folder}R7.png {folder}R8.png {folder}R9.png'.format(folder='img/').split()))
     walkLeft = list(map(pygame.image.load,
@@ -53,6 +68,21 @@ class player:
 
 
 class fire_bullet:
+    '''
+    Creates the bullets fired
+
+    Object params:
+    x ---> initial x coordinate
+    y ---> initial y coordinate
+    radius ---> bullet size
+    color ---> bullet color
+    facing ---> direction player is facing while shooting. -1 = left, +1 = right
+    vel ---> Velocity of bullet. Default 10
+
+    Methods:
+    draw() ---> makes bullet animation
+    '''
+
     def __init__(self, x, y, radius, color, facing, vel=10):
         self.x, self.y, self.facing = x, y, facing
         self.color = color
@@ -64,6 +94,21 @@ class fire_bullet:
 
 
 class enemy:
+    '''
+    Creates the main character of game
+
+    Object params:
+    x ---> initial x coordinate of enemy
+    y ---> initial y coordinate of enemy
+    width ---> width of enemy
+    height ---> height of enemy
+    end ---> right end position of enemy. Default 10
+    vel ---> Velocity of enemy. Default 4
+
+    Methods:
+    draw() ---> draws the character movement at location
+    moce() ---> enemy movement direction logic
+    '''
     walkRight = list(map(pygame.image.load,
                          '{folder}R1E.png {folder}R2E.png {folder}R3E.png {folder}R4E.png {folder}R5E.png {folder}R6E.png {folder}R7E.png {folder}R8E.png {folder}R9E.png {folder}R10E.png {folder}R11E.png'.format(folder='img/').split()))
     walkLeft = list(map(pygame.image.load,
@@ -99,7 +144,7 @@ class enemy:
             self.walkCount = 0
 
 
-def redrawGameWindow():  # function to render window
+def redrawGameWindow():  # function to draw objects on window
     win.blit(bg, (0, 0))
     hero.draw(win)  # hero
     goblin.draw(win)
@@ -130,7 +175,7 @@ while run:
         else:  # delete when beyond screen
             bullets.pop(bullets.index(bullet))
 
-    if keys[pygame.K_SPACE] and len(bullets) < 6:
+    if keys[pygame.K_SPACE] and len(bullets) < 6:  # bullet creation
         if hero.left:
             facing = -1
         else:
