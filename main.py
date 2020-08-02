@@ -17,37 +17,45 @@ bg = pygame.image.load('img/bg.jpg')
 idle = pygame.image.load('img/standing.png')
 
 
-x, y, width, height, vel = 20, 416, 64, 64, 8
-left, right = False, False
-walkCount = 0
-run = True
-jumpcount = 10
-jump = False
+class player:
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.vel = 8
+        self.left = False
+        self.right = False
+        self.walkCount = 0
+        self.jumpcount = 10
+        self.jump = False
+
+    def draw(self, win):
+        # since we have only 9 sprites/movement we set 3 frame = 1 image and walkCount <= 27
+        if (self.walkCount+1) >= 27:
+            self.walkCount = 0
+        # logic to choose character image as per movements
+        if self.left:
+            win.blit(walkLeft[self.walkCount//3], (self.x, self.y))
+            self.walkCount += 1
+        elif self.right:
+            win.blit(walkRight[self.walkCount//3], (self.x, self.y))
+            self.walkCount += 1
+        else:
+            win.blit(idle, (self.x, self.y))
+
 
 clock = pygame.time.Clock()
 
 
 def redrawGameWindow():
-    global walkCount
     win.blit(bg, (0, 0))
-
-    # since we have only 9 sprites/movement we set 3 frame = 1 image and walkCount <= 27
-    if (walkCount+1) >= 27:
-        walkCount = 0
-
-    # logic to choose character image as per movements
-    if left:
-        win.blit(walkLeft[walkCount//3], (x, y))
-        walkCount += 1
-    elif right:
-        win.blit(walkRight[walkCount//3], (x, y))
-        walkCount += 1
-    else:
-        win.blit(idle, (x, y))
-
+    hero.draw(win)
     pygame.display.update()
 
 
+hero = player(20, 416, 64, 64)
+run = True
 # game begins
 while run:
     clock.tick(27)  # 27fps. 9 images per movement. 1 move = 3 frames
@@ -57,34 +65,34 @@ while run:
             run = False
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_LEFT] and x > 0:  # movement control
-        x -= vel
-        left, right = True, False
-        print("LEFT")
-    elif keys[pygame.K_RIGHT] and x < (screen_width-width-vel):
-        x += vel
-        left, right = False, True
-        print("RIGHT")
+    if keys[pygame.K_LEFT] and hero.x > 0:  # movement control
+        hero.x -= hero.vel
+        hero.left, hero.right = True, False
+        print("L")
+    elif keys[pygame.K_RIGHT] and hero.x < (screen_width-hero.width-hero.vel):
+        hero.x += hero.vel
+        hero.left, hero.right = False, True
+        print("R")
     else:
-        left, right = False, False
-        walkCount = 0
+        hero.left, hero.right = False, False
+        hero.walkCount = 0
 
-    if not(jump):  # Logic to make a jump and fall back
+    if not(hero.jump):  # Logic to make a jump and fall back
         if keys[pygame.K_SPACE]:
-            jump = True
-            left, right = False, False
-            walkCount = 0
+            hero.jump = True
+            hero.left, hero.right = False, False
+            hero.walkCount = 0
             print("JUMP")
     else:
-        if jumpcount >= -10:
+        if hero.jumpcount >= -10:
             neg = 1
-            if jumpcount < 0:
+            if hero.jumpcount < 0:
                 neg = -1
-            y -= (jumpcount**2)*0.5*neg
-            jumpcount -= 1
+            hero.y -= (hero.jumpcount**2)*0.5*neg
+            hero.jumpcount -= 1
         else:
-            jump = False
-            jumpcount = 10
+            hero.jump = False
+            hero.jumpcount = 10
 
     redrawGameWindow()
 
